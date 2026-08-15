@@ -31,6 +31,10 @@ export default function AppHomePage({
 						ライブを作成
 					</Link>
 				</Button>
+				<Button variant="brand" size="xl" className="rounded-2xl" asChild>
+					<Link to=""></Link>
+
+				</Button>
 			</div>
 			<div className="space-y-4">
 				{lives.map((live) => (

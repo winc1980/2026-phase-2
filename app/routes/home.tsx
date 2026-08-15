@@ -15,7 +15,7 @@ export default function TopPage() {
     <div>
       <h1>トップページ</h1>
       <div>{message}</div>
-      <Login></Login>
+      <Login />
       <Register />
       <Home />
     </div>

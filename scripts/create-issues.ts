@@ -228,7 +228,7 @@ function ensureLabels(repo: string, difficulties: Set<Difficulty>) {
 }
 
 function enableIssue(repo: string) {
-	execFileSync("gh", ["repo", "edit", repo, "--enable-issues",], {
+	execFileSync("gh", ["repo", "edit", repo, "--enable-issues"], {
 		stdio: "ignore",
 	})
 }

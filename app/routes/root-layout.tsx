@@ -4,7 +4,9 @@ import { Toaster } from "~/components/ui/sonner"
 import { BaseError } from "~/lib/error"
 import { repositoryMiddleware } from "~/middlewares/repositories"
 import { commitSession, getSession } from "~/sessions/sessions"
+import { useEffect } from "react";
 import type { Route } from "./+types/root-layout"
+import LiveLayout from "./app/live/live-layout"
 
 export const middleware: Route.MiddlewareFunction[] = [repositoryMiddleware]
 
@@ -18,17 +20,19 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function RootLayout({ loaderData }: Route.ComponentProps) {
-	if (loaderData.toastPayload) {
-		// 副作用
-		showToast(loaderData.toastPayload)
-	}
+  // 副作用
+  useEffect(() => {
+    if (loaderData.toastPayload) {
+      showToast(loaderData.toastPayload);
+    }
+	}, [loaderData.toastPayload]);
 
-	return (
-		<>
-			<Toaster position="top-center" />
-			<Outlet />
-		</>
-	)
+  return (
+    <>
+      <Toaster position="top-center" />
+      <Outlet />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

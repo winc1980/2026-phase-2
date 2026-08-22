@@ -1,7 +1,7 @@
 ---
 seq: 5
-difficulty: Normal
-title: `application.tsx`のコンポーネントが肥大化している
+difficulty: HARD
+title: "`application.tsx`のコンポーネントが肥大化している"
 ---
 
 過剰に肥大化したファイルは読みづらいです。
@@ -37,6 +37,60 @@ bun run dev
 
 切り出すときに、そのコンポーネントが動くために**外から何を受け取る必要があるか**を考えてください。それがpropsになります。
 
+たとえば「有効なリンク」の一覧（の一部）を切り出す場合、こういう流れになります。
+
+**分割前**（`LiveApplicationPage`の中に直接書かれている）
+
+```tsx
+export default function LiveApplicationPage({
+ loaderData: { availableApplicationsWithUrl },
+}: Route.ComponentProps) {
+ return (
+  <Card>
+   <CardHeader>
+    <CardTitle>有効なリンク</CardTitle>
+   </CardHeader>
+   <CardContent>
+    {availableApplicationsWithUrl.map((apl) => (
+     <div key={apl.id}>{apl.name}</div>
+    ))}
+   </CardContent>
+  </Card>
+ )
+}
+```
+
+**分割後**（新しい関数`AvailableApplicationList`に切り出す）
+
+```tsx
+function AvailableApplicationList({
+ applications,
+}: {
+ applications: LiveApplicationWithUrl[]
+}) {
+ return (
+  <Card>
+   <CardHeader>
+    <CardTitle>有効なリンク</CardTitle>
+   </CardHeader>
+   <CardContent>
+    {applications.map((apl) => (
+     <div key={apl.id}>{apl.name}</div>
+    ))}
+   </CardContent>
+  </Card>
+ )
+}
+
+export default function LiveApplicationPage({
+ loaderData: { availableApplicationsWithUrl },
+}: Route.ComponentProps) {
+ return <AvailableApplicationList applications={availableApplicationsWithUrl} />
+}
+```
+
+`availableApplicationsWithUrl`という配列がないと`AvailableApplicationList`は描画できないので、`applications`というpropsとして渡しています。実際の一覧には`onClick`のハンドラなど他にも必要な値があるので、同じ考え方で1つずつpropsに追加していってください。
+
 <details>
 <summary>ヒント：何をpropsで渡す？</summary>
 
@@ -71,3 +125,13 @@ bun run dev
 > [!note]
 > 別ファイルに置いたコンポーネントを使うには、`export`して、使う側で`import`する必要があります。
 > パスの先頭の`~/`は`app/`を指す、このプロジェクト独自の書き方です（`tsconfig.json`で設定されています）。
+
+## 5 達成条件
+
+- [ ] `application.tsx`の`LiveApplicationPage`が、作成フォーム／有効なリンク一覧／停止されたリンク一覧の3つ以上のコンポーネントに分割されている
+- [ ] 「有効なリンク」と「停止されたリンク」の一覧が、アイコンと`intent`をpropsで受け取る1つの共通コンポーネントにまとめられている
+- [ ] 分割後も募集リンクの作成・停止・再開・コピーが分割前と同じように動作する
+
+### 発展（任意）
+
+- [ ] 切り出したコンポーネントが`application.tsx`とは別のファイルに配置され、`export`/`import`されている

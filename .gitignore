@@ -7,6 +7,6 @@
 
 # SQLite
 *.db
-
-# 環境変数
 .env
+
+# env, db, build ぐらいで基本大丈夫！

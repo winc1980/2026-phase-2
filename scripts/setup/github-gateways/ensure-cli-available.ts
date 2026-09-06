@@ -11,13 +11,6 @@ export async function ensureGitHubCliAvailable() {
 	}
 	logInfo("GitHub CLIが使用可能であることを確認できました。")
 
-	const jqVersionResult = await $`jq --version`.quiet().nothrow()
-	if (jqVersionResult.exitCode !== 0) {
-		logError("「jq」コマンドが見つかりません。jqをインストールしてください。")
-		process.exit(1)
-	}
-	logInfo("jqが使用可能であることを確認できました。")
-
 	logInfo("GitHub CLIでユーザー認証されているか確認しています...")
 	const authResult = await $`gh auth status`.quiet().nothrow()
 	if (authResult.exitCode !== 0) {

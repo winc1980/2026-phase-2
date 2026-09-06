@@ -88,18 +88,8 @@ export async function updateIssues(userName: string) {
 }
 
 export async function fetchExistingIssueInfo(userName: string) {
-	const shellResult =
-		await $`gh api --method GET --paginate /repos/${userName}/${GITHUB_REPO_NAME}/issues -f state=all -f per_page=100 | jq -s 'add | map({number: .number, title})'`
-			.quiet()
-			.nothrow()
-	if (shellResult.exitCode !== 0) {
-		logError("Issueの一覧の取得に失敗しました。")
-		process.exit(1)
-	}
+	const issues = await fetchAllIssues(userName)
 
-	const jsonParser = v.array(
-		v.object({ number: v.number(), title: v.string() }),
-	)
 	const objectParser = v.pipe(
 		v.object({ number: v.number(), title: v.string() }),
 		v.rawTransform(({ dataset, addIssue, NEVER }) => {
@@ -116,21 +106,50 @@ export async function fetchExistingIssueInfo(userName: string) {
 		}),
 	)
 
-	const jsonParseResult = v.safeParse(jsonParser, shellResult.json())
-	if (!jsonParseResult.success) {
-		logError("Issueの解析に失敗しました。")
-		process.exit(1)
-	}
-
 	const issuesInfo: { number: number; seq: number }[] = []
 
-	for (const issueInfo of jsonParseResult.output) {
+	for (const issueInfo of issues) {
 		const objectParseResult = v.safeParse(objectParser, issueInfo)
 		if (!objectParseResult.success) continue
 		issuesInfo.push(objectParseResult.output)
 	}
 
 	return issuesInfo
+}
+
+/** 1ページあたりのIssue取得件数（GitHub APIの上限値） */
+const ISSUES_PER_PAGE = 100
+
+/** Issueの一覧を全ページ分取得する */
+async function fetchAllIssues(userName: string) {
+	const pageParser = v.array(
+		v.object({ number: v.number(), title: v.string() }),
+	)
+
+	const issues: { number: number; title: string }[] = []
+
+	for (let page = 1; ; page++) {
+		const shellResult =
+			await $`gh api --method GET /repos/${userName}/${GITHUB_REPO_NAME}/issues -f state=all -f per_page=${ISSUES_PER_PAGE} -f page=${page}`
+				.quiet()
+				.nothrow()
+		if (shellResult.exitCode !== 0) {
+			logError("Issueの一覧の取得に失敗しました。")
+			process.exit(1)
+		}
+
+		const pageParseResult = v.safeParse(pageParser, shellResult.json())
+		if (!pageParseResult.success) {
+			logError("Issueの解析に失敗しました。")
+			process.exit(1)
+		}
+
+		issues.push(...pageParseResult.output)
+		// 取得件数が上限に満たなければ最終ページ
+		if (pageParseResult.output.length < ISSUES_PER_PAGE) break
+	}
+
+	return issues
 }
 
 async function validateIssueFile(

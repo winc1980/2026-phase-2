@@ -15,7 +15,7 @@ export async function syncUpstreamMain(userName: string) {
 		await setRulesetEnforcement(userName, rulesetId, "disabled")
 	}
 
-	let syncError: string | null = null
+	let syncError: string | string[] | null = null
 
 	try {
 		const checkoutResult = await $`git checkout main`.quiet().nothrow()
@@ -24,9 +24,26 @@ export async function syncUpstreamMain(userName: string) {
 		}
 
 		if (syncError === null) {
-			const pullResult = await $`git pull upstream main`.quiet().nothrow()
-			if (pullResult.exitCode !== 0) {
-				syncError = "リモート「upstream」の「main」からのpullに失敗しました。"
+			const fetchResult = await $`git fetch upstream`.quiet().nothrow()
+			if (fetchResult.exitCode !== 0) {
+				syncError = "リモート「upstream」からのfetchに失敗しました。"
+			}
+		}
+
+		if (syncError === null) {
+			// 受講者のmainには自分のPull Requestのマージが積まれているため、履歴を書き換えないマージで取り込む。
+			// pullではなくmergeを直接使うことで、ローカルのpull.rebase設定に挙動を左右されないようにする。
+			const mergeResult = await $`git merge --no-edit upstream/main`
+				.quiet()
+				.nothrow()
+			if (mergeResult.exitCode !== 0) {
+				// 中断したマージ状態を残さないように元に戻す
+				await $`git merge --abort`.quiet().nothrow()
+				syncError = [
+					"リモート「upstream」の「main」の取り込みに失敗しました。",
+					"コンフリクトが発生している可能性があります。次のコマンドで手動で取り込み、解決してください。",
+					"git merge upstream/main",
+				]
 			}
 		}
 

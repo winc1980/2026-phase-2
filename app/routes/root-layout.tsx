@@ -5,6 +5,7 @@ import { BaseError } from "~/lib/error"
 import { repositoryMiddleware } from "~/middlewares/repositories"
 import { commitSession, getSession } from "~/sessions/sessions"
 import type { Route } from "./+types/root-layout"
+import { useEffect } from "react"
 
 export const middleware: Route.MiddlewareFunction[] = [repositoryMiddleware]
 
@@ -18,11 +19,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function RootLayout({ loaderData }: Route.ComponentProps) {
-	if (loaderData.toastPayload) {
-		// 副作用
-		showToast(loaderData.toastPayload)
-	}
 
+	useEffect(() => {
+		if (loaderData.toastPayload) {
+ 			// ここに処理
+		 	showToast(loaderData.toastPayload)
+		}
+	}, [loaderData.toastPayload])
+	//一旦様子見
+console.log("RootLayout loaderData:", loaderData)
 	return (
 		<>
 			<Toaster position="top-center" />

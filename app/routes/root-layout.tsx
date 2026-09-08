@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { data, isRouteErrorResponse, Outlet } from "react-router"
 import { showToast } from "~/components/common/toast"
 import { Toaster } from "~/components/ui/sonner"
@@ -5,6 +6,7 @@ import { BaseError } from "~/lib/error"
 import { repositoryMiddleware } from "~/middlewares/repositories"
 import { commitSession, getSession } from "~/sessions/sessions"
 import type { Route } from "./+types/root-layout"
+import LiveLayout from "./app/live/live-layout"
 
 export const middleware: Route.MiddlewareFunction[] = [repositoryMiddleware]
 
@@ -18,10 +20,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function RootLayout({ loaderData }: Route.ComponentProps) {
-	if (loaderData.toastPayload) {
-		// 副作用
-		showToast(loaderData.toastPayload)
-	}
+	// 副作用
+	useEffect(() => {
+		if (loaderData.toastPayload) {
+			showToast(loaderData.toastPayload)
+		}
+	}, [loaderData.toastPayload])
 
 	return (
 		<>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Home, Login, Register } from "~/components/common/Login"
 
 export default function TopPage() {
 	const [message, setMessage] = useState<string | null>(null)
@@ -12,6 +13,9 @@ export default function TopPage() {
 		<div>
 			<h1>トップページ</h1>
 			<div>{message}</div>
+			<Login />
+			<Register />
+			<Home />
 		</div>
 	)
 }

@@ -8,5 +8,5 @@
 # SQLite
 *.db
 
-# 環境変数
+# .envをgitignoreする
 .env

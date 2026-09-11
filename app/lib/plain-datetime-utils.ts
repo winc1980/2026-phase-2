@@ -18,7 +18,7 @@ const Deserializer = v.pipe(
 	),
 )
 
-type r = v.InferOutput<typeof Deserializer>
+//type r = v.InferOutput<typeof Deserializer>
 
 export const PlainDateTimeSerde: Serde<[PlainDate, PlainTime], string> = {
 	serialize: (s: [PlainDate, PlainTime]): string => {

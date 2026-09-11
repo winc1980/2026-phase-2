@@ -76,7 +76,7 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 					</Button>
 				</CardContent>
 			</Card>
-				<Card className="w-full max-w-xl">
+			<Card className="w-full max-w-xl">
 				<CardContent>
 					<Button variant="brand" className="w-full" asChild>
 						<Link to="/app">ホームに戻る</Link>
